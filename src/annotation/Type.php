@@ -39,7 +39,7 @@ use twinkle\dto\validation\DtoInterface;
  */
 final class Type
 {
-    public function check(&$value, $typeList)
+    public function check(&$value, $typeList, $ruleList)
     {
         foreach ($typeList as $type) {
             switch ($type) {
@@ -50,29 +50,36 @@ final class Type
                     break;
                 case 'int':
                 case 'integer':
-                    if ('integer' == gettype($value)) {
+                    if (is_int($value)) {
                         return true;
-                    } elseif (is_numeric($value)) {
+                    } elseif (is_numeric($value) || is_null($value)) {
                         $value = intval($value);
                         return true;
                     }
                     break;
                 case 'bool':
                 case 'boolean':
-                    if ('boolean' == gettype($value)) {
+                    if (is_bool($value)) {
                         return true;
-                    } elseif (0 === $value || 1 === $value) {
+                    } elseif (0 === $value || 1 === $value || is_null($value)) {
                         $value = boolval($value);
                         return true;
                     }
                     break;
                 case 'float':
                 case 'double':
-                    if ('float' == gettype($value)) {
+                    if (is_float($value)) {
                         return true;
-                    } elseif ('integer' == gettype($value)) {
+                    } elseif (is_int($value) || is_numeric($value)) {
                         $value = floatval($value);
                         return true;
+                    }
+                    break;
+                case 'string':
+                    if (is_string($value)) {
+                        return true;
+                    } elseif (is_null($value) || is_int($value)) {
+                        $value = strval($value);
                     }
                     break;
                 case 'array':
@@ -82,11 +89,6 @@ final class Type
                     break;
                 case 'object':
                     if (is_object($value)) {
-                        return true;
-                    }
-                    break;
-                case 'callable':
-                    if (is_callable($value)) {
                         return true;
                     }
                     break;

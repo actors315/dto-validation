@@ -10,7 +10,7 @@ namespace twinkle\dto\validation\annotation;
  */
 final class Required
 {
-    public function check(&$value, $default = null)
+    public function check(&$value, $default = null, $ruleLis = [])
     {
         if (null !== $value) {
             return true;

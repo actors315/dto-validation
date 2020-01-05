@@ -73,7 +73,7 @@ trait Validate
         foreach ($this->validateRules as $key => $ruleList) {
             foreach ($ruleList as $name => $rule) {
                 try {
-                    if (!$ruleContainer["Validate:{$name}"]->check($this->{$key}, $rule)) {
+                    if (!$ruleContainer["Validate:{$name}"]->check($this->{$key}, $rule, $ruleList)) {
                         return false;
                     }
                 } catch (\Exception $e) {
