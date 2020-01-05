@@ -6,4 +6,21 @@ dto 较验
 
 这个库主要就是满足这些需要。
 
+## 示例
 
+```php
+
+    /**
+     * @Validate #声明需要较验
+     * @var integer #参数类型
+     * @Required(default=1) # 必须,默认为1
+     * @Enum(1,2,3) #参数值必须是 1,2,3中的一个
+     */
+    public $property;
+
+```
+
+## Note
+
+为了更好的开发体验，强列建议安装 annotations 插件  
+phpstorm(http://plugins.jetbrains.com/plugin/7320-php-annotations)
