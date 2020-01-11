@@ -39,9 +39,13 @@ use twinkle\dto\validation\DtoInterface;
  */
 final class Type
 {
-    public function check(&$value, $typeList)
+    private $error = '';
+
+    public function check(&$value, $params = [], $ruleList = null)
     {
-        foreach ($typeList as $type) {
+        $this->error = '';
+
+        foreach ($params['typeList'] as $type) {
             switch ($type) {
                 case '*':
                 case 'mixed':
@@ -52,26 +56,17 @@ final class Type
                 case 'integer':
                     if ('integer' == gettype($value)) {
                         return true;
-                    } elseif (is_numeric($value)) {
-                        $value = intval($value);
-                        return true;
                     }
                     break;
                 case 'bool':
                 case 'boolean':
                     if ('boolean' == gettype($value)) {
                         return true;
-                    } elseif (0 === $value || 1 === $value) {
-                        $value = boolval($value);
-                        return true;
                     }
                     break;
                 case 'float':
                 case 'double':
                     if ('float' == gettype($value)) {
-                        return true;
-                    } elseif ('integer' == gettype($value)) {
-                        $value = floatval($value);
                         return true;
                     }
                     break;
@@ -80,29 +75,42 @@ final class Type
                         return true;
                     }
                     break;
-                case 'object':
-                    if (is_object($value)) {
-                        return true;
-                    }
-                    break;
-                case 'callable':
-                    if (is_callable($value)) {
-                        return true;
-                    }
-                    break;
                 default:
                     if (is_object($value)) {
-                        if ($value instanceof DtoInterface && $value->validate()) {
-                            return true;
-                        }
-
-                        if ($value instanceof $type) {
+                        var_dump($type);
+                        if ($value instanceof DtoInterface) {
+                            return $value->validate();
+                        } elseif ($value instanceof $type) {
                             return true;
                         }
                     }
             }
         }
 
+        /**
+         * 尝试转换
+         */
+        if ($params['autoConvert']) {
+            $fixType = $params['autoConvert'];
+            if (('integer' == $fixType || 'int' == $fixType) && is_numeric($value)) {
+                $value = intval($value);
+                return true;
+            } elseif (('boolean' == $fixType || 'bool' == $fixType) && ('0' === $value || 0 === $value || 1 == $value)) {
+                $value = boolval($value);
+                return true;
+            } elseif (('float' == $fixType || 'double' == $fixType) && is_numeric($value)) {
+                $value = floatval($value);
+                return true;
+            }
+        }
+
+        $this->error = sprintf("Type Error[expect %s,actual %s]", implode('|', $params['typeList']), gettype($value));
+
         return false;
+    }
+
+    public function getError()
+    {
+        return $this->error;
     }
 }

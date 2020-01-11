@@ -48,17 +48,27 @@ trait Validate
 
             $name = $property->getName();
             if (false !== strpos($propertyComment, '@Required')) {
-                preg_match('/@Required[(]default=([^,]+)[)]\s+([^\s]+)/', $propertyComment, $matches);
-                $this->validateRules[$name]['Required'] = isset($matches[1]) ? $matches[1] : null;
+                preg_match('/@Required[(](.*)[)]/', $propertyComment, $matches);
+                $this->validateRules[$name]['Required'] = null;
+                if (!empty($matches[1])) {
+                    $params = [];
+                    $tempList = explode(',', trim($matches[1]));
+                    foreach ($tempList as $temp) {
+                        list($k, $v) = explode('=', $temp);
+                        $params[trim($k)] = $v;
+                    }
+                    $this->validateRules[$name]['Required'] = $params;
+                }
             }
 
-            if (false !== strpos($propertyComment, '@var') && preg_match('/@var\s+([^\s]+)/', $propertyComment, $matches)) {
+            if (false !== strpos($propertyComment, '@var') && preg_match('/@var\s+([^\s]+)\s+(autoConvert=([^\s]+))*/', $propertyComment, $matches)) {
                 $typeList = explode('|', $matches[1]);
-                $this->validateRules[$name]['Type'] = $typeList;
+                $this->validateRules[$name]['Type'] = ['typeList' => $typeList, 'autoConvert' => isset($matches[2]) ? $matches[3] : false];
             }
 
             if (false !== strpos($propertyComment, '@Enum') && preg_match('/@Enum[(](.+)[)]/', $propertyComment, $matches)) {
-                $this->validateRules[$name]['Enum'] = explode(',', $matches[1]);
+                $enumList = explode(',', $matches[1]);
+                $this->validateRules[$name]['Enum'] = ['enumList' => $enumList];
             }
         }
 
@@ -73,7 +83,7 @@ trait Validate
         foreach ($this->validateRules as $key => $ruleList) {
             foreach ($ruleList as $name => $rule) {
                 try {
-                    if (!$ruleContainer["Validate:{$name}"]->check($this->{$key}, $rule)) {
+                    if (!$ruleContainer["Validate:{$name}"]->check($this->{$key}, $rule, $ruleList)) {
                         return false;
                     }
                 } catch (\Exception $e) {

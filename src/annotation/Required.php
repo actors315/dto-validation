@@ -10,12 +10,12 @@ namespace twinkle\dto\validation\annotation;
  */
 final class Required
 {
-    public function check(&$value, $default = null)
+    public function check(&$value, $params = [],$ruleList = null)
     {
         if (null !== $value) {
             return true;
-        } elseif (null !== $default) {
-            $value = $default;
+        } elseif (!empty($params) && isset($params['default'])) {
+            $value = $params['default'];
             return true;
         }
         return false;

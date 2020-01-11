@@ -10,8 +10,8 @@ namespace twinkle\dto\validation\annotation;
  */
 final class Enum
 {
-    public function check($value, $enumList)
+    public function check($value, $params = [],$ruleList = null)
     {
-        return in_array($value,$enumList);
+        return in_array($value, $params['enumList']);
     }
 }
