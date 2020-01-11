@@ -54,20 +54,27 @@ final class Type
                     break;
                 case 'int':
                 case 'integer':
-                    if ('integer' == gettype($value)) {
+                    if (is_int($value)) {
                         return true;
                     }
                     break;
                 case 'bool':
                 case 'boolean':
-                    if ('boolean' == gettype($value)) {
+                    if (is_bool($value)) {
                         return true;
                     }
                     break;
                 case 'float':
                 case 'double':
-                    if ('float' == gettype($value)) {
+                    if (is_float($value)) {
                         return true;
+                    }
+                    break;
+                case 'string':
+                    if (is_string($value)) {
+                        return true;
+                    } elseif (is_null($value) || is_int($value)) {
+                        $value = strval($value);
                     }
                     break;
                 case 'array':
@@ -100,6 +107,9 @@ final class Type
                 return true;
             } elseif (('float' == $fixType || 'double' == $fixType) && is_numeric($value)) {
                 $value = floatval($value);
+                return true;
+            } elseif ('string' == $fixType && $tempValue = strval($value)) {
+                $value = $tempValue;
                 return true;
             }
         }
