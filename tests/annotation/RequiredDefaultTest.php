@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use twinkle\dto\validation\Validate;
 
 /**
- * vendor/bin/phpunit --bootstrap vendor/autoload.php tests/annotation/RequiredDefaultTest.php
+ * vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/annotation/RequiredDefaultTest.php
  * Class RequiredTest
  * @package twinkle\dto\validation\annotation
  */

@@ -3,6 +3,7 @@
 
 namespace twinkle\dto\validation;
 
+use phpDocumentor\Reflection\DocBlock\Tags\Var_;
 use ReflectionClass;
 use ReflectionException;
 use Twinkle\DI\Exception\ContainerException;
@@ -10,6 +11,7 @@ use Twinkle\DI\Tools;
 use twinkle\dto\validation\annotation\Enum;
 use twinkle\dto\validation\annotation\Required;
 use twinkle\dto\validation\annotation\Type;
+use twinkle\dto\validation\cache\AbstractCache;
 use twinkle\dto\validation\rule\Rule;
 
 /**
@@ -19,26 +21,30 @@ use twinkle\dto\validation\rule\Rule;
 trait Validate
 {
 
-    protected $isParser = false;
+    protected $annotationValidateRules = [];
 
-    public $validateRules = [];
+    /**
+     * @var AbstractCache
+     */
+    public $ruleCacheHandler = null;
+
 
     /**
      * 规则解析
      * @throws ReflectionException
-     * @throws ContainerException
      */
     public function parser()
     {
-        if ($this->isParser) {
-            return true;
+        if ($this->annotationValidateRules) {
+            return $this->annotationValidateRules;
         }
 
-        Tools::getContainer()->injection('Validate:Required', Required::class);
-        Tools::getContainer()->injection('Validate:Type', Type::class);
-        Tools::getContainer()->injection('Validate:Enum', Enum::class);
-
         $class = new ReflectionClass(__CLASS__);
+        if ($this->ruleCacheHandler && $rules = $this->ruleCacheHandler->get(__CLASS__, filemtime($class->getFileName()))) {
+            unset($class);
+            return $this->annotationValidateRules = $rules;
+        }
+
         $properties = $class->getProperties();
         foreach ($properties as $property) {
             $propertyComment = $property->getDocComment();
@@ -49,7 +55,7 @@ trait Validate
             $name = $property->getName();
             if (false !== strpos($propertyComment, '@Required')) {
                 preg_match('/@Required[(](.*)[)]/', $propertyComment, $matches);
-                $this->validateRules[$name]['Required'] = null;
+                $this->annotationValidateRules[$name]['Required'] = null;
                 if (!empty($matches[1])) {
                     $params = [];
                     $tempList = explode(',', trim($matches[1]));
@@ -57,31 +63,39 @@ trait Validate
                         list($k, $v) = explode('=', $temp);
                         $params[trim($k)] = $v;
                     }
-                    $this->validateRules[$name]['Required'] = $params;
+                    $this->annotationValidateRules[$name]['Required'] = $params;
                 }
             }
 
             if (false !== strpos($propertyComment, '@var') && preg_match('/@var\s+([^\s]+)\s+(autoConvert=([^\s]+))*/', $propertyComment, $matches)) {
                 $typeList = explode('|', $matches[1]);
-                $this->validateRules[$name]['Type'] = ['typeList' => $typeList, 'autoConvert' => isset($matches[2]) ? $matches[3] : false];
+                $this->annotationValidateRules[$name]['Type'] = ['typeList' => $typeList, 'autoConvert' => isset($matches[2]) ? $matches[3] : false];
             }
 
             if (false !== strpos($propertyComment, '@Enum') && preg_match('/@Enum[(](.+)[)]/', $propertyComment, $matches)) {
                 $enumList = explode(',', $matches[1]);
-                $this->validateRules[$name]['Enum'] = ['enumList' => $enumList];
+                $this->annotationValidateRules[$name]['Enum'] = ['enumList' => $enumList];
             }
         }
 
-        $this->isParser = true;
+        if ($this->ruleCacheHandler) {
+            $this->ruleCacheHandler->set(__CLASS__, $this->annotationValidateRules);
+        }
+
+        return $this->annotationValidateRules;
     }
 
     public function validate()
     {
-        $this->parser();
+        $rules = $this->parser();
 
         $ruleContainer = Tools::getContainer();
-        foreach ($this->validateRules as $key => $ruleList) {
+        foreach ($rules as $key => $ruleList) {
             foreach ($ruleList as $name => $rule) {
+                if (!isset($ruleContainer["Validate:{$name}"])) {
+                    throw new \RuntimeException('请先注入规则较验器【Validate:' . $name . '】');
+                }
+
                 try {
                     if (!$ruleContainer["Validate:{$name}"]->check($this->{$key}, $rule, $ruleList)) {
                         return false;

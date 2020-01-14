@@ -5,11 +5,12 @@ namespace twinkle\dto\validation\annotation;
 
 
 use PHPUnit\Framework\TestCase;
+use twinkle\dto\validation\cache\FileCache;
 use twinkle\dto\validation\DtoInterface;
 use twinkle\dto\validation\Validate;
 
 /**
- * vendor/bin/phpunit --bootstrap vendor/autoload.php tests/annotation/TypeTest.php
+ * vendor/bin/phpunit --bootstrap tests/bootstrap.php tests/annotation/TypeTest.php
  * Class TypeTest
  * @package twinkle\dto\validation\annotation
  */
@@ -24,6 +25,7 @@ class TypeTest extends TestCase
     public $property;
 
     public function setUp() {
+        $this->ruleCacheHandler = new FileCache(__DIR__ . "/../cache",86400);
     }
 
     public function testValidate()

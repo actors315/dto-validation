@@ -6,6 +6,21 @@ dto 较验
 
 这个库主要就是满足这些需要。
 
+## 使用
+
+使用前必须将规则较验实例注入到容器
+
+```php
+
+$container = new \Twinkle\DI\Container([
+    'Validate:Required' => \twinkle\dto\validation\annotation\Required::class,
+    'Validate:Type' => \twinkle\dto\validation\annotation\Type::class,
+    'Validate:Enum' => \twinkle\dto\validation\annotation\Enum::class,
+]);
+\Twinkle\DI\Tools::setContainer($container);
+
+```
+
 ## 示例
 
 ```php

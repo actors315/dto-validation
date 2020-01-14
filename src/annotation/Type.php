@@ -84,7 +84,6 @@ final class Type
                     break;
                 default:
                     if (is_object($value)) {
-                        var_dump($type);
                         if ($value instanceof DtoInterface) {
                             return $value->validate();
                         } elseif ($value instanceof $type) {
