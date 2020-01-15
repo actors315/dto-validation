@@ -1,6 +1,8 @@
 # dto-validation
 dto 较验
 
+[![Build Status](https://travis-ci.org/actors315/dto-validation.svg?branch=master)](https://travis-ci.org/actors315/dto-validation)  
+
 日常工作中，跟第三方系统对接是常有的事，而这些系统可能并不是同一种语言实现的，因为语言特性不同，总会遇到意想不到的事情。  
 比如 php 是弱类型语言，'1'  与 1 是没有区别的，但是在 java 中，这两个就并不相同了。比如 null 与 '' 在 php 中也是相等的，但是在其他语言中，赋值就可能报错。  
 
