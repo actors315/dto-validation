@@ -1,4 +1,10 @@
-.idea/
-vendor/
-test/cache/
+.buildpath
+.project
+.settings/*
+/vendor/*
+/Runtime/*
 composer.lock
+
+/.idea
+/nbproject/private/
+/nbproject
