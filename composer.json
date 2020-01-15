@@ -1,5 +1,5 @@
 {
-  "name": "twinkle/annotation",
+  "name": "twinkle/dto-validation",
   "description": "dto验证器",
   "require": {
     "twinkle/di": "^1.0"
