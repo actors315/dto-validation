@@ -12,7 +12,7 @@ install:
 
 before_script:
   - cd tests/
-  - git clone -b gh-pages https://github.com/actors315/DI.git tests/
+  - git clone -b gh-pages https://github.com/actors315/dto-validation.git tests/
   - cd ..
 
 script:
